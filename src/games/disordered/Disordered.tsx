@@ -100,6 +100,7 @@ export default function Disordered({ socket, me, members, game }: GameProps) {
       solved: boolean;
     }) {
       setHistory((h) => [{ order: p.order, correct: p.correct }, ...h]);
+      setScorePop({ correct: p.correct, key: Date.now() });
       if (p.solved) setSolved(true);
     }
     function onSolved(p: { id: string }) {
