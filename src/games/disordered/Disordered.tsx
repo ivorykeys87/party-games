@@ -312,54 +312,81 @@ export default function Disordered({ socket, me, members, game }: GameProps) {
         </p>
 
         {/* Board */}
-        <div
-          className="mb-4 mt-8 grid gap-2"
-          style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}
-        >
-          {board.map((emoji, i) => {
-            const isLocked = locked.has(i);
-            const isSource = dragIndex === i; // tile being dragged — grayed out
-            const isTarget = dragOver === i; // hovered drop slot — blue
-            const highlighted = isTarget || selected === i;
-            return (
-              <div key={i} className="relative aspect-square w-full">
-                <div
-                  role="button"
-                  data-slot={i}
-                  onClick={() => clickSlot(i)}
-                  onPointerDown={(e) => onSlotPointerDown(e, i)}
-                  className={`flex h-full w-full touch-none select-none items-center justify-center rounded-xl border-2 text-2xl transition sm:text-3xl ${
-                    isLocked
-                      ? "border-amber-400/60 bg-amber-400/10 cursor-default"
-                      : highlighted
-                        ? "-translate-y-1 border-sky-400 bg-sky-400/20 cursor-grab active:cursor-grabbing"
-                        : "border-white/10 bg-white/5 hover:border-white/30 cursor-grab active:cursor-grabbing"
-                  } ${isSource ? "opacity-40 grayscale" : ""} ${solved ? "!cursor-default" : ""}`}
-                >
-                  {emoji}
-                </div>
-                {!solved && (
-                  <button
-                    type="button"
-                    draggable={false}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleLock(i);
-                    }}
-                    title={isLocked ? "Locked — click to unlock" : "Lock this position"}
-                    className={`absolute bottom-full left-1/2 z-10 mb-2 grid h-6 w-6 -translate-x-1/2 touch-manipulation place-items-center rounded-md border transition sm:h-5 sm:w-5 ${
+        <div className="relative">
+          <div
+            className="mb-4 mt-8 grid gap-2"
+            style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}
+          >
+            {board.map((emoji, i) => {
+              const isLocked = locked.has(i);
+              const isSource = dragIndex === i; // tile being dragged — grayed out
+              const isTarget = dragOver === i; // hovered drop slot — blue
+              const highlighted = isTarget || selected === i;
+              return (
+                <div key={i} className="relative aspect-square w-full">
+                  <div
+                    role="button"
+                    data-slot={i}
+                    onClick={() => clickSlot(i)}
+                    onPointerDown={(e) => onSlotPointerDown(e, i)}
+                    className={`flex h-full w-full touch-none select-none items-center justify-center rounded-xl border-2 text-2xl transition sm:text-3xl ${
                       isLocked
-                        ? "border-amber-400/60 bg-amber-400/25 text-amber-300"
-                        : "border-white/10 bg-black/40 text-white/30 hover:text-white/80"
-                    }`}
+                        ? "border-amber-400/60 bg-amber-400/10 cursor-default"
+                        : highlighted
+                          ? "-translate-y-1 border-sky-400 bg-sky-400/20 cursor-grab active:cursor-grabbing"
+                          : "border-white/10 bg-white/5 hover:border-white/30 cursor-grab active:cursor-grabbing"
+                    } ${isSource ? "opacity-40 grayscale" : ""} ${solved ? "!cursor-default" : ""}`}
                   >
-                    <LockIcon open={!isLocked} />
-                  </button>
-                )}
+                    {emoji}
+                  </div>
+                  {!solved && (
+                    <button
+                      type="button"
+                      draggable={false}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLock(i);
+                      }}
+                      title={isLocked ? "Locked — click to unlock" : "Lock this position"}
+                      className={`absolute bottom-full left-1/2 z-10 mb-2 grid h-6 w-6 -translate-x-1/2 touch-manipulation place-items-center rounded-md border transition sm:h-5 sm:w-5 ${
+                        isLocked
+                          ? "border-amber-400/60 bg-amber-400/25 text-amber-300"
+                          : "border-white/10 bg-black/40 text-white/30 hover:text-white/80"
+                      }`}
+                    >
+                      <LockIcon open={!isLocked} />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Score popup — animates over the board on each guess result */}
+          {scorePop && (
+            <div
+              key={scorePop.key}
+              className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center animate-score-pop"
+            >
+              <div className="rounded-2xl border-2 border-sky-400/50 bg-slate-900/85 px-6 py-4 text-center shadow-2xl backdrop-blur">
+                <div
+                  className={`text-6xl font-black sm:text-7xl ${
+                    scorePop.correct === n
+                      ? "text-emerald-300"
+                      : scorePop.correct === 0
+                        ? "text-rose-300"
+                        : "text-sky-200"
+                  }`}
+                >
+                  {scorePop.correct}
+                </div>
+                <div className="mt-1 text-sm font-semibold uppercase tracking-wide text-violet-100/70">
+                  {scorePop.correct === 1 ? "in the right spot" : `of ${n} in the right spot`}
+                </div>
               </div>
-            );
-          })}
+            </div>
+          )}
         </div>
 
         {/* Floating ghost of the emoji being dragged (mouse + touch) */}
